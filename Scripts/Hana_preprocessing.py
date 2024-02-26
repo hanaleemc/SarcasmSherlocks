@@ -14,7 +14,7 @@ DATA_PATH = './Data/train.En.csv'
 df = pd.read_csv(DATA_PATH, usecols= ['tweet','sarcastic'])
 
 
-#Step 1 | Remove [URLs, Hastags, Stop words] & Keep  [Punctuation; Userhandles; emojis]
+#Preprocessing Type II | Convert emotion icons, urls & convert to @user token 
  
 def preprocess_type_II(tweet_text):
     if pd.isna(tweet_text) or tweet_text == '':
@@ -37,6 +37,8 @@ df['ProcessedTweet_II'] = df['tweet'].apply(preprocess_type_II)
 #Create new dataframe with processed tweets 
 df_II = df[['ProcessedTweet_II', 'sarcastic']]
 print(df_II)
+
+#type III | remove multiple punction, same character, contractions 
 
 def preprocess_type_III(tweet_text):
     smiley_mapping = {":-)": "smiley", ":)": "smiley", ":-(": "sad", ":(": "sad", ":D": "playful"}
@@ -68,6 +70,8 @@ print(df_III)
 
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
+
+#type IV | lemmatizes words, removes stopwords
 
 def preprocess_type_IV(tweet_text, language='english'):
     if pd.notna(tweet_text):
