@@ -86,7 +86,7 @@ def is_special_pattern(token_text):
     Check if the token text is a special pattern we want to keep:
     - Combination of question mark, exclamation mark and dot in any order (e.g., '?!', '!!??', '?!!?')
     """
-    if re.fullmatch(r"[\?!\.]+", token_text):
+    if re.fullmatch(r"[\?!]+", token_text):
         return True
 
     return False

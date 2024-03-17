@@ -1,4 +1,5 @@
 import argparse
+from keras.callbacks import EarlyStopping
 
 from Model import prepare_datasets, create_model
 from Evaluation import plot_history
@@ -30,8 +31,15 @@ def main():
 
     print(model.summary())
 
+    #Include EarlyStopping to stop the training process early if a monitored metric has stopped improving
+    #The patience parameter is the number of epochs to wait for an improvement
+    # verbose- Log a message when stopping
+    # Restore model weights from the epoch with the best value of the monitored metric
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1, restore_best_weights=True)
+
     #saving the metrics results
-    results_visual = model.fit(train_data, epochs=10, validation_data=test_data, class_weight={1: 4, 0: 1})
+    results_visual = model.fit(train_data, epochs=20, validation_data=test_data, class_weight={1: 4, 0: 1},
+                               callbacks=[early_stopping])
 
     #plotting the metrics results
     plot_history(results_visual)

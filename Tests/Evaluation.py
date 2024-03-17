@@ -21,6 +21,13 @@ def f1_m(y_true, y_pred):
     recall = recall_m(y_true, y_pred)
     return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
+
+def balanced_accuracy(y_true, y_pred):
+    recall_positive = recall_m(y_true, y_pred)
+    recall_negative = recall_m(1 - y_true, 1 - y_pred)
+    balanced_acc = (recall_positive + recall_negative) / 2
+    return balanced_acc
+
 #Func for plotting the results
 def plot_history(history):
     plt.figure(figsize=(12, 6))
