@@ -1,7 +1,7 @@
 from keras import backend as K
 import matplotlib.pyplot as plt
 
-# functions for evaluation
+# Functions for evaluation
 def recall_m(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
@@ -28,7 +28,7 @@ def balanced_accuracy(y_true, y_pred):
     balanced_acc = (recall_positive + recall_negative) / 2
     return balanced_acc
 
-#Func for plotting the results
+#Functions for plotting the results
 def plot_history(history):
     plt.figure(figsize=(12, 6))
 
