@@ -61,7 +61,7 @@ def dataset_embedding(dataset_path, tokenizer, preproc_type=None, batch_size=32)
                                           padded_shapes=({"text_input": (None,), "sentiment_input": (1,)}, ()))
 
 
-def prepare_datasets(train_path, test_path, preproc_type):
+def prepare_datasets_polar(train_path, test_path, preproc_type):
 
     model_name = 'distilbert-base-uncased'
 

@@ -100,6 +100,5 @@ def create_model(model_type, tokenizer, learning_rate=0.001):
     model.compile(loss='binary_crossentropy', optimizer=optimizer,
                   metrics=['accuracy', f1_m, balanced_accuracy, AUC(name='aucroc')])
 
-
     return model
 

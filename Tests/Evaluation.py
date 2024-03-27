@@ -1,5 +1,6 @@
 from keras import backend as K
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 # Functions for evaluation
 def recall_m(y_true, y_pred):
@@ -27,6 +28,7 @@ def balanced_accuracy(y_true, y_pred):
     recall_negative = recall_m(1 - y_true, 1 - y_pred)
     balanced_acc = (recall_positive + recall_negative) / 2
     return balanced_acc
+
 
 #Functions for plotting the results
 def plot_history(history):

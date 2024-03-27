@@ -3,7 +3,7 @@ from keras.callbacks import EarlyStopping
 
 from Model import prepare_datasets, create_model
 from Extended_model import create_ext_model
-from Model_with_polarity import prepare_datasets, create_model_polarity
+from Model_with_polarity import prepare_datasets_polar, create_model_polarity
 from Evaluation import plot_history
 
 train_path = './Data/train.En.csv'
@@ -41,17 +41,20 @@ def main():
 
     args = parser.parse_args()
 
-    # Preparing dataset
-    train_data, test_data, tokenizer = prepare_datasets(train_path, test_path, args.pptype)
-
     # Determine which model function to call based on the provided arguments
     if args.model_type != 'None':
+        #Preparing dataset
+        train_data, test_data, tokenizer = prepare_datasets(train_path, test_path, args.pptype)
+        # Creating the model
         model = create_model(args.model_type, tokenizer, args.learning_rate)
+        #Checking if the correct model type is chosen
         print("model_type:", args.model_type)
     elif args.ext_model_type != 'None':
+        train_data, test_data, tokenizer = prepare_datasets(train_path, test_path, args.pptype)
         model = create_ext_model(args.ext_model_type, tokenizer, args.learning_rate)
         print("ext_model_type:", args.ext_model_type)
     elif args.polar_model_type != 'None':
+        train_data, test_data, tokenizer = prepare_datasets_polar(train_path, test_path, args.pptype)
         model = create_model_polarity(args.polar_model_type, tokenizer, args.learning_rate)
         print("polar_model_type:", args.polar_model_type)
     else:
