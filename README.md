@@ -6,12 +6,9 @@ task. It supports various preprocessing techniques and model architectures.
 LSTM and BiLSTM Model Training Features Multiple Preprocessing Options:
 
 -Supports different preprocessing techniques to prepare text data for model training.
-
 -Configurable Model Types: Allows the selection between LSTM and BiLSTM models, including
 extended and polarity-aware variants.
-
 -Customizable Training Parameters: offers control over learning rate
-
 Early Stopping: Implements early stopping to halt training when the validation loss
 ceases to decrease, preventing overfitting.
 
@@ -44,13 +41,8 @@ performance metrics, including F1 score, accuracy, and balanced accuracy. It wil
 plots of the training history.
 
 **Requirements**
-
 -TensorFlow
-
 -Keras
-
 -Pandas
-
 -NLTK
-
 -TextBlob
