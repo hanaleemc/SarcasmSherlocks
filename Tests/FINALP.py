@@ -1,67 +1,84 @@
 import argparse
-from keras.callbacks import EarlyStopping  # Add this line
+from keras.callbacks import EarlyStopping
 
 from Model import prepare_datasets, create_model
+from Extended_model import create_ext_model
+from Model_with_polarity import prepare_datasets_polar, create_model_polarity
 from Evaluation import plot_history
 
 train_path = './Data/train.En.csv'
 test_path = './Data/test.En.csv'
-#train_path = 'Train_Dataset.csv'
-#test_path = 'Test_Dataset.csv'
 
 def main():
 
     parser = argparse.ArgumentParser(description='Training LSTM or BiLSTM model')
 
     parser.add_argument('--pptype', dest='pptype',
-                        choices=['PreprocI', 'PreprocII', 'PreprocIII', 'PreprocIV_A', 'PreprocIV_B'],
+                        choices=['PreprocI','PreprocII', 'PreprocIII', 'PreprocIV_A', 'PreprocIV_B'],
                         help='{PreprocI, PreprocII, PreprocIII, PreprocIV_A, PreprocIV_B}',
                         type=str, default='None')
 
     parser.add_argument('--model', dest='model_type',
                         choices=['LSTM', 'BiLSTM'],
                         help='{LSTM, BiLSTM}',
-                        type=str, default='LSTM')
+                        type=str, default='None')
 
-    parser.add_argument('--loss', dest='loss_function',
-                        choices=['binary_crossentropy', 'weighted_binary_cross_entropy'],
-                        help='{binary_crossentropy, weighted_binary_cross_entropy}',
-                        type=str, default='binary_crossentropy')
+    parser.add_argument('--ext_model', dest='ext_model_type',
+                        choices=['BiLSTM_L2_D', 'BiLSTM_D', 'BiLSTM_simple', 'BiLSTM_simple_D',
+                                 'LSTM_L2_D', 'LSTM_D', 'LSTM_simple', 'LSTM_simple_D'],
+                        help='{BiLSTM_L2_D, BiLSTM_D, BiLSTM_simple, BiLSTM_simple_D, '
+                             'LSTM_L2_D, LSTM_D, LSTM_simple, LSTM_simple_D}',
+                        type=str, default='None')
 
-    parser.add_argument('--pos_weight', dest='pos_weight',
-                        help='Positive weight for weighted binary cross-entropy loss',
-                        type=float, default=None)
+    parser.add_argument('--lr', dest='learning_rate',
+                        help='Learning rate for the optimizer',
+                        type=float, default=0.001)
+
+    parser.add_argument('--polar_model', dest='polar_model_type',
+                        choices=['BiLSTM_polar', 'LSTM_polar'],
+                        help='{BiLSTM_polar, LSTM_polar}',
+                        type=str, default='None')
 
     args = parser.parse_args()
 
-    # Pass the pptype argument to prepare_datasets
-    train_data, _, tokenizer = prepare_datasets(train_path, test_path, args.pptype)  # Only training data is required
-
-    # Create model based on the selected model type and loss function
-    if args.loss_function == 'weighted_binary_cross_entropy':
-        if args.pos_weight is None:
-            raise argparse.ArgumentError(None, "The --pos_weight argument is required when using weighted_binary_cross_entropy loss.")
-        model = create_model(args.model_type, tokenizer, loss_function=args.loss_function, pos_weight=args.pos_weight)
+    # Determine which model function to call based on the provided arguments
+    if args.model_type != 'None':
+        #Preparing dataset
+        train_data, test_data, tokenizer = prepare_datasets(train_path, test_path, args.pptype)
+        # Creating the model
+        model = create_model(args.model_type, tokenizer, args.learning_rate)
+        #Checking if the correct model type is chosen
+        print("model_type:", args.model_type)
+    elif args.ext_model_type != 'None':
+        train_data, test_data, tokenizer = prepare_datasets(train_path, test_path, args.pptype)
+        model = create_ext_model(args.ext_model_type, tokenizer, args.learning_rate)
+        print("ext_model_type:", args.ext_model_type)
+    elif args.polar_model_type != 'None':
+        train_data, test_data, tokenizer = prepare_datasets_polar(train_path, test_path, args.pptype)
+        model = create_model_polarity(args.polar_model_type, tokenizer, args.learning_rate)
+        print("polar_model_type:", args.polar_model_type)
     else:
-        model = create_model(args.model_type, tokenizer, loss_function=args.loss_function)
+        raise ValueError("No model type specified.")
 
     print(model.summary())
 
-    # Include EarlyStopping to stop the training process early if a monitored metric has stopped improving
-    # The patience parameter is the number of epochs to wait for an improvement
-    # verbose- Log a message when stopping
-    # Restore model weights from the epoch with the best value of the monitored metric
+    #Include EarlyStopping to stop the training process early if a monitored metric has stopped improving
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1, restore_best_weights=True)
 
-    # Include validation data
-    _, test_data, _ = prepare_datasets(train_path, test_path, args.pptype)
-
-    # saving the metrics results
+    #Saving the metrics results
     results_visual = model.fit(train_data, epochs=20, validation_data=test_data, class_weight={1: 4, 0: 1},
                                callbacks=[early_stopping])
 
-    # plotting the metrics results
+    #Plotting the metrics results
     plot_history(results_visual)
+
+    # Getting the best F1 score, accuracy and balanced accuracy
+    best_f1_score = max(results_visual.history['val_f1_m'])
+    best_accuracy = max(results_visual.history['val_accuracy'])
+    best_balanced_accuracy = max(results_visual.history['val_balanced_accuracy'])
+    print(f"Best F1 Score: {round(best_f1_score,4)}")
+    print(f"Best Accuracy: {round(best_accuracy, 4)}")
+    print(f"Best Balanced Accuracy: {round(best_balanced_accuracy,4)}")
 
 if __name__ == "__main__":
     main()
