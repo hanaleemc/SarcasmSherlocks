@@ -1,4 +1,5 @@
-LSTM AND BILSTM MODEL TRAINING
+**LSTM AND BILSTM MODEL TRAINING**
+
 This project provides a flexible tool for training LSTM and BiLSTM models for sarcasm detection
 task. It supports various preprocessing techniques and model architectures.
 
@@ -42,7 +43,7 @@ based on validation loss to prevent overfitting. After training, it will output 
 performance metrics, including F1 score, accuracy, and balanced accuracy. It will also generate
 plots of the training history.
 
-Requirements
+**Requirements**
 
 -TensorFlow
 
