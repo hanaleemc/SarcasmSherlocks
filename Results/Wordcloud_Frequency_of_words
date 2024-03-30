@@ -1,0 +1,147 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import re
+import nltk
+from nltk.tokenize import TweetTokenizer
+from nltk import FreqDist
+from nltk.corpus import stopwords
+import string
+import emoji
+import demoji
+from os import path
+from PIL import Image
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from collections import Counter
+
+pd.set_option('display.max_colwidth', None)
+
+sarc = pd.read_csv("train.En.csv")
+
+sarc.head()
+
+#removing unnecessary columns for this exercise
+sarc_data = sarc.drop(["Unnamed: 0", "rephrase", "sarcasm", "irony", "satire", "understatement", "overstatement", "rhetorical_question"] , axis=1)
+
+df = sarc_data
+
+#using intial preprocessing
+#lowercase
+df.tweet = df.tweet.str.lower()
+# @ user
+df.tweet = df.tweet.apply(lambda x: re.sub(r'@[\w]+', '@user', str(x)))
+# remove url part 1
+df.tweet = df.tweet.apply(lambda x: re.sub(r'https?:\/\/\S+', 'URL', str(x)))
+# remove url/website that didn't use http, is only checking for .com websites
+# so words that are seperated by a . are not removed
+df.tweet = df.tweet.apply(lambda x: re.sub(r"www\.[a-z]?\.?(com)+|[a-z]+\.(com)", 'URL', str(x)))
+# remove {link}
+df.tweet = df.tweet.apply(lambda x: re.sub(r'{link}', 'URL', x))
+# remove hastags
+df.tweet = df.tweet.apply(lambda x: re.sub(r'#[\w]+', '', x))
+
+
+def replace_with_words(text):
+    return emoji.demojize(text)
+
+df['tweet'] = df['tweet'].apply(replace_with_words)
+
+tknzr = TweetTokenizer()
+df['tweet']= df['tweet'].apply(tknzr.tokenize)
+
+
+STOPWORDS = set(stopwords.words('english'))
+
+def remove_stopwords(word_list):
+    """remove stopwords from a list of tokens"""
+    return [w for w in word_list if w not in STOPWORDS]
+
+df['tweet'] = df['tweet'].apply(remove_stopwords)
+
+df.head()
+
+# Isolating sarcastic and non-sarcastic
+sarcastic_tweets = df[df['sarcastic'] == 1]['tweet']
+non_sarcastic_tweets = df[df['sarcastic'] == 0]['tweet']
+
+sarcastic_tweets.head()
+
+non_sarcastic_tweets.head()
+
+sarc_text = []
+
+for tweet in sarcastic_tweets:
+    # single string
+    tweet_str = ' '.join(tweet)
+    sarc_text.append(tweet_str)
+
+# Combine all sarcastic tweets into a single string
+sarc_text_combined = ' '.join(sarc_text)
+
+# Generate word cloud
+sarc_cloud = WordCloud(width=520, height=260, stopwords=STOPWORDS, max_font_size=50, background_color="black", colormap='Pastel1').generate(sarc_text_combined)
+
+# Display word cloud
+plt.figure(figsize=(16, 10))
+plt.imshow(sarc_cloud, interpolation='bilinear')
+plt.axis('off')  # turn off axis
+plt.show()
+
+text = sarc_text_combined
+word_freq = Counter(text.split())
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(word_freq)
+
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+
+# top 20 because most are punctuation based
+print("Top 20 most common words:")
+for word, freq in word_freq.most_common(20):
+    print(f"{word}: {freq}")
+
+
+
+# List for comparison
+sarc_frequent_word_list = [word for word, freq in word_freq.most_common(20)]
+print(sarc_frequent_word_list)
+
+non_sarc_text = []
+
+for tweet in non_sarcastic_tweets:
+    #join-one string
+    tweet_str = ' '.join(tweet)
+    non_sarc_text.append(tweet_str)
+
+# single string
+non_sarc_text_combined = ' '.join(non_sarc_text)
+
+non_sarc_cloud = WordCloud(width=520, height=260, stopwords=STOPWORDS, max_font_size=50, background_color="black", colormap='Pastel1').generate(non_sarc_text_combined)
+
+plt.figure(figsize=(16, 10))
+plt.imshow(non_sarc_cloud, interpolation='bilinear')
+plt.axis('off')  # turn off axis
+plt.show()
+
+text = non_sarc_text_combined
+word_freq = Counter(text.split())
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(word_freq)
+
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+
+# Get top 20 as most are punctuation based
+print("Top 20 most common words:")
+for word, freq in word_freq.most_common(20):
+    print(f"{word}: {freq}")
+
+
+# save as list for comparison
+non_sarc_frequent_word_list = [word for word, freq in word_freq.most_common(20)]
+
+sarc_frequent_word_list
+
+non_sarc_frequent_word_list
