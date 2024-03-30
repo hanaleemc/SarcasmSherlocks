@@ -1,4 +1,4 @@
-- LSTM AND BILSTM MODEL TRAINING
+LSTM AND BILSTM MODEL TRAINING
 This project provides a flexible tool for training LSTM and BiLSTM models for sarcasm detection
 task. It supports various preprocessing techniques and model architectures.
 
